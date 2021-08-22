@@ -49,7 +49,7 @@ function App() {
           console.log("error", e.message);
           setUploading(false);
         }
-        setProgress(((numImported / movies.length) * 100).toFixed(1));
+        setProgress(((numImported / movies.length) * 100).toFixed());
       });
 
       forceUpdate();
@@ -180,7 +180,6 @@ function App() {
                     onChange={() => handleImport()}
                   />
                   Import
-                  {uploading && <span className="ml-2">{progress}%</span>}
                 </label>
               </span>
               <span>
