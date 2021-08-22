@@ -24,7 +24,7 @@ function App() {
     forceUpdate();
   }, []);
 
-  useEffect(() => console.log("uploading:", uploading), [uploading]);
+  // useEffect(() => console.log("uploading:", uploading), [uploading]);
 
   function handleImport() {
     var input = document.getElementById("upload");
@@ -32,6 +32,7 @@ function App() {
     let movies = null;
 
     reader.onload = function (e) {
+      let numImported = 0;
       setProgress(0);
       setUploading(true);
       const csvFile = reader.result;
@@ -40,7 +41,8 @@ function App() {
         await axios.post(process.env.REACT_APP_API_URL + "/movies", {
           movie,
         });
-        setProgress((((index + 1) / movies.length) * 100).toFixed());
+        numImported++;
+        setProgress(((numImported / movies.length) * 100).toFixed());
       });
       forceUpdate();
     };
