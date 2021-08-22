@@ -48,6 +48,7 @@ function App() {
         } catch (e) {
           console.log("error", e.message);
           setUploading(false);
+          forceUpdate();
         }
         setProgress(((numImported / movies.length) * 100).toFixed());
       });
