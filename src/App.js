@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, React } from "react";
 import { csv2json } from "./utils/csv2json";
 import axios from "axios";
 import Filter from "./components/Filter";
+import ProgressBar from "./components/ProgressBar";
 
 function App() {
   const [movieList, setMovieList] = useState(null);
@@ -35,18 +36,26 @@ function App() {
       let numImported = 0;
       setProgress(0);
       setUploading(true);
+
       const csvFile = reader.result;
       movies = JSON.parse(csv2json(csvFile));
       movies.forEach(async (movie, index) => {
-        await axios.post(process.env.REACT_APP_API_URL + "/movies", {
-          movie,
-        });
-        numImported++;
+        try {
+          await axios.post(process.env.REACT_APP_API_URL + "/movies", {
+            movie,
+          });
+          numImported++;
+        } catch (e) {
+          console.log("error", e.message);
+          setUploading(false);
+        }
         setProgress(((numImported / movies.length) * 100).toFixed(1));
       });
+
       forceUpdate();
     };
     reader.readAsText(input.files[0]);
+    setUploading(false);
   }
 
   const sortByName = (a, b) => {
@@ -149,7 +158,8 @@ function App() {
             )}
             <div className="ml-3 space-x-1">
               <span>
-                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <label className=" cursor-pointer inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 ">
+                  {uploading && <ProgressBar progress={progress} />}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="-ml-1 mr-2 h-5 w-5"
