@@ -15,6 +15,11 @@ export default function Filter({ field, values, update }) {
     field && setSelected(field.col);
   }, []);
 
+  function reset() {
+    setSelected(field.col);
+    update();
+  }
+
   return (
     <Fragment>
       {/*
@@ -25,13 +30,7 @@ export default function Filter({ field, values, update }) {
   https://www.w3.org/TR/wai-aria-practices/#Listbox
   https://www.w3.org/TR/wai-aria-practices/examples/listbox/listbox-collapsible.html
 */}
-      <div>
-        <label
-          id="listbox-label"
-          className="hidden text-sm font-medium text-gray-700"
-        >
-          Assigned to
-        </label>
+      <div className="">
         <div className="relative flex -space-x-1">
           <button
             onClick={() => toggleMenu()}
@@ -63,10 +62,7 @@ export default function Filter({ field, values, update }) {
           </button>
 
           <button
-            onClick={() => {
-              setSelected(field.col);
-              update();
-            }}
+            onClick={() => reset()}
             className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
           >
             <span className="sr-only">Clear</span>
@@ -122,6 +118,7 @@ Leaving: "transition ease-in duration-100"
                         <span
                           onClick={() => {
                             setSelected(value);
+                            // todo reset other filters
                             update({ field, value });
                             toggleMenu();
                           }}

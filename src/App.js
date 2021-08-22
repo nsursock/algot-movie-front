@@ -37,12 +37,13 @@ function App() {
       setUploading(true);
       const csvFile = reader.result;
       movies = JSON.parse(csv2json(csvFile));
+      console.log(movies);
       movies.forEach(async (movie, index) => {
         await axios.post(process.env.REACT_APP_API_URL + "/movies", {
           movie,
         });
         numImported++;
-        setProgress(((numImported / movies.length) * 100).toFixed());
+        setProgress(((numImported / movies.length) * 100).toFixed(1));
       });
       forceUpdate();
     };
@@ -123,7 +124,20 @@ function App() {
                 />
                 <Filter
                   update={forceUpdate}
-                  field={{ col: "Release Date", prop: "year" }}
+                  field={{ col: "Genre", prop: "genre" }}
+                  values={[
+                    ...new Set(
+                      movieList
+                        .map((movie) => {
+                          return movie.genre.split(",").map((g) => g.trim());
+                        })
+                        .flat()
+                    ),
+                  ].sort(sortByName)}
+                />
+                <Filter
+                  update={forceUpdate}
+                  field={{ col: "Release", prop: "year" }}
                   values={[
                     ...new Set(
                       movieList.map((movie) => {
@@ -260,3 +274,27 @@ function App() {
 }
 
 export default App;
+
+// <div>
+//   <button
+//     type="button"
+//     className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
+//     id="menu-button"
+//     aria-expanded="true"
+//     aria-haspopup="true"
+//   >
+//     Search
+//     <svg
+//       className="-mr-1 ml-2 h-5 w-5"
+//       xmlns="http://www.w3.org/2000/svg"
+//       viewBox="0 0 20 20"
+//       fill="currentColor"
+//     >
+//       <path
+//         fillRule="evenodd"
+//         d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+//         clipRule="evenodd"
+//       />
+//     </svg>
+//   </button>
+// </div>
