@@ -18,10 +18,14 @@ buttons and filters and the actual table displaying the data. Since I'm using
 the DRY principle, I didn't separate those components in 2 files. The length
 of the file isn't that important for readability and maintenance.
 
+There's a special hook called ClickOutside that allows the user to close the
+filter dropdown by clicking anywhere outside of that element. It's a pretty
+simple feature but it improves the user experience.
+
 # Limitations
 
-- Filtering: It's impossible to filter movies with more than one criteria. It's an
-  improvement I should have made but I hesitated with the features I should use:
+- Filtering: It's impossible to filter movies with more than one criteria. It's
+  an improvement I should have made but I hesitated with the features:
   Context API or a basic Hook that emits events. One could have added a generic
   search bar that looks for info in all columns.
 - Progress bar: I tried to turn the import button into a progress bar. I
@@ -31,6 +35,9 @@ of the file isn't that important for readability and maintenance.
 - Sorting: It would have been easy to include some sorting based on the
   columns but it wasn't asked by the requirements. By default, movies are
   sorted by rating (descending). That way you know the best movies right away.
+- Pagination: The website is slow because there's no pagination and it results
+  in an excessive DOM size (~8000 elements). Adding pagination is easy and if I
+  had the time, I would have done it.
 
 # Available Scripts
 
@@ -39,16 +46,16 @@ directory, you can run:
 
 ## `yarn start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Runs the app in the development mode. Open
+[http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+The page will reload if you make edits. You will also see any lint errors in
+the console.
 
 ## `yarn build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Builds the app for production to the `build` folder. It correctly bundles React
+in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The build is minified and the filenames include the hashes. Your app is ready
+to be deployed!

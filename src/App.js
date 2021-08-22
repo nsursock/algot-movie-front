@@ -37,7 +37,6 @@ function App() {
       setUploading(true);
       const csvFile = reader.result;
       movies = JSON.parse(csv2json(csvFile));
-      console.log(movies);
       movies.forEach(async (movie, index) => {
         await axios.post(process.env.REACT_APP_API_URL + "/movies", {
           movie,
