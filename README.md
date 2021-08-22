@@ -38,6 +38,9 @@ simple feature but it improves the user experience.
 - Pagination: The website is slow because there's no pagination and it results
   in an excessive DOM size (~8000 elements). Adding pagination is easy and if I
   had the time, I would have done it.
+- Import: You can't import the same file twice without refreshing the page. You
+  can import another file but the use of the onchange event prevents importing
+  the same file twice without reloading.
 
 # Available Scripts
 
