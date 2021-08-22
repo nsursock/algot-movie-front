@@ -41,6 +41,9 @@ simple feature but it improves the user experience.
 - Import: You can't import the same file twice without refreshing the page. You
   can import another file but the use of the onchange event prevents importing
   the same file twice without reloading.
+- Input: There's a problem with the file provided or my function that converts
+  csv to json. The last record sends a bad request and the logs show the website
+  tries to insert an empty object.
 
 # Available Scripts
 
