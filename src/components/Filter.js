@@ -17,7 +17,7 @@ export default function Filter({ field, values, update }) {
 
   function reset() {
     setSelected(field.col);
-    update();
+    update({ field, value: null });
   }
 
   return (

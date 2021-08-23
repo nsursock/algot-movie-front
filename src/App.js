@@ -10,20 +10,63 @@ function App() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(null);
   const [remaining, setRemaining] = useState(null);
+
+  const [actor, setActor] = useState(null);
+  const [director, setDirector] = useState(null);
+  const [genre, setGenre] = useState(null);
+  const [year, setYear] = useState(null);
+
   // const [, updateState] = useState();
   // const forceUpdate = useCallback(() => updateState({}), []);
 
   function forceUpdate(param) {
-    let url = process.env.REACT_APP_API_URL + "/movies";
-    if (param) {
-      url += "?" + "field=" + encodeURIComponent(param.field.prop);
-      url += "&" + "value=" + encodeURIComponent(param.value);
+    switch (param?.field.prop) {
+      case "actors":
+        setActor(param.value);
+        break;
+      case "director":
+        setDirector(param.value);
+        break;
+      case "genre":
+        setGenre(param.value);
+        break;
+      case "year":
+        setYear(param.value);
+        break;
     }
+  }
+
+  useEffect(() => {
+    let url = process.env.REACT_APP_API_URL + "/movies";
+    if (actor) {
+      url += "?field=" + encodeURIComponent("actors");
+      url += "&" + "value=" + encodeURIComponent(actor);
+    }
+    if (director) {
+      url += actor ? "&" : "?";
+      url += "field=" + encodeURIComponent("director");
+      url += "&" + "value=" + encodeURIComponent(director);
+    }
+    if (genre) {
+      url += actor || director ? "&" : "?";
+      url += "field=" + encodeURIComponent("genre");
+      url += "&" + "value=" + encodeURIComponent(genre);
+    }
+    if (year) {
+      url += actor || director || genre ? "&" : "?";
+      url += "field=" + encodeURIComponent("year");
+      url += "&" + "value=" + encodeURIComponent(year);
+    }
+    axios.get(url).then((data) => setMovieList(data.data));
+  }, [actor, director, genre, year]);
+
+  function refreshTable() {
+    let url = process.env.REACT_APP_API_URL + "/movies";
     axios.get(url).then((data) => setMovieList(data.data));
   }
 
   useEffect(() => {
-    forceUpdate();
+    refreshTable();
   }, []);
 
   function handleImport() {
@@ -67,7 +110,7 @@ function App() {
       );
 
       setUploading(false);
-      forceUpdate();
+      refreshTable();
       // setTimeout(() => setUploading(false), 1000);
     };
     reader.readAsText(input.files[0]);
@@ -218,7 +261,7 @@ function App() {
                   onClick={async () =>
                     axios
                       .delete(process.env.REACT_APP_API_URL + "/movies")
-                      .then(() => forceUpdate())
+                      .then(() => refreshTable())
                   }
                   type="button"
                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none "
