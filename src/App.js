@@ -9,6 +9,7 @@ function App() {
   const [movieList, setMovieList] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(null);
+  const [remaining, setRemaining] = useState(null);
   // const [, updateState] = useState();
   // const forceUpdate = useCallback(() => updateState({}), []);
 
@@ -25,38 +26,51 @@ function App() {
     forceUpdate();
   }, []);
 
-  // useEffect(() => console.log("uploading:", uploading), [uploading]);
-
   function handleImport() {
     var input = document.getElementById("upload");
     var reader = new FileReader();
     let movies = null;
 
-    reader.onload = function (e) {
+    reader.onload = async function (e) {
       let numImported = 0;
       setProgress(0);
       setUploading(true);
+      var start,
+        end,
+        diff,
+        total = 0,
+        average,
+        remaining;
 
       const csvFile = reader.result;
       movies = JSON.parse(csv2json(csvFile));
-      movies.forEach(async (movie, index) => {
-        try {
-          await axios.post(process.env.REACT_APP_API_URL + "/movies", {
-            movie,
-          });
-          numImported++;
-        } catch (e) {
-          console.log("error", e.message);
-          setUploading(false);
-          forceUpdate();
-        }
-        setProgress(((numImported / movies.length) * 100).toFixed());
-      });
+      await Promise.all(
+        movies.map(async (movie, index) => {
+          try {
+            if (movie.Name !== "") {
+              start = new Date();
+              await axios.post(process.env.REACT_APP_API_URL + "/movies", {
+                movie,
+              });
+              numImported++;
+              end = new Date();
+              diff = end - start;
+              total += diff;
+            }
+          } catch (e) {
+            console.log("error", e.message);
+          }
+          average = total / numImported / 1000;
+          setRemaining((average * (movies.length - numImported)).toFixed());
+          setProgress(((numImported / movies.length) * 100).toFixed());
+        })
+      );
 
+      setUploading(false);
       forceUpdate();
+      // setTimeout(() => setUploading(false), 1000);
     };
     reader.readAsText(input.files[0]);
-    setUploading(false);
   }
 
   const sortByName = (a, b) => {
@@ -159,8 +173,14 @@ function App() {
             )}
             <div className="ml-3 space-x-1">
               <span>
-                <label className=" cursor-pointer inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 ">
-                  {uploading && <ProgressBar progress={progress} />}
+                <label
+                  className={` ${
+                    uploading && "w-24"
+                  } relative overflow-hidden cursor-pointer inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700`}
+                >
+                  {/*}{uploading && (
+                    <ProgressBar progress={progress} remaining={remaining} />
+                  )}*/}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="-ml-1 mr-2 h-5 w-5"
@@ -180,7 +200,17 @@ function App() {
                     className="hidden"
                     onChange={() => handleImport()}
                   />
-                  Import
+                  {!uploading ? (
+                    <span>Import</span>
+                  ) : (
+                    <>
+                      <span className="mx-auto">{progress}%</span>
+                      <div
+                        className="h-full absolute inset-0 bg-indigo-900 opacity-50"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </>
+                  )}
                 </label>
               </span>
               <span>

@@ -1,7 +1,7 @@
 import { React, Fragment, useState, useEffect } from "react";
 import ReactDOM, { createPortal } from "react-dom";
 
-export default function ProgressBar({ isShowing, hide, progress }) {
+export default function ProgressBar({ isShowing, hide, progress, remaining }) {
   const [show, setShow] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
@@ -58,9 +58,14 @@ export default function ProgressBar({ isShowing, hide, progress }) {
               className="h-full  bg-indigo-700 flex items-center justify-center"
               style={{ width: `${progress}%` }}
             ></div>
-            <h1 className="absolute inset-0 flex items-center justify-center xt-4xl tracking-tight font-extrabold text-gray-200 sm:text-5xl md:text-6xl">
-              {progress}%
-            </h1>
+            <div className="absolute inset-0 flex flex-col items-center justify-center ">
+              <span className="xt-4xl tracking-tight font-extrabold text-gray-200 sm:text-5xl md:text-6xl">
+                {progress}%
+              </span>
+              <span class="text-base text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl">
+                {remaining}secs remaining
+              </span>
+            </div>
           </div>
         </div>
       </div>
