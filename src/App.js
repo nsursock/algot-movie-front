@@ -17,7 +17,7 @@ function App() {
   const [genre, setGenre] = useState(null);
   const [year, setYear] = useState(null);
 
-  // useEffect(() => console.log(loading), [loading]);
+  useEffect(() => console.log(loading), [loading]);
 
   function forceUpdate(param) {
     switch (param?.field.prop) {
@@ -59,15 +59,19 @@ function App() {
     }
 
     setLoading(true);
-    axios.get(url).then((data) => setMovieList(data.data));
-    setLoading(false);
+    axios.get(url).then((data) => {
+      setMovieList(data.data);
+      setLoading(false);
+    });
   }, [actor, director, genre, year]);
 
   function refreshTable() {
     let url = process.env.REACT_APP_API_URL + "/movies";
     setLoading(true);
-    axios.get(url).then((data) => setMovieList(data.data));
-    setLoading(false);
+    axios.get(url).then((data) => {
+      setMovieList(data.data);
+      setLoading(false);
+    });
   }
 
   useEffect(() => {
