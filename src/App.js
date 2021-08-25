@@ -6,6 +6,7 @@ import ProgressBar from "./components/ProgressBar";
 
 function App() {
   const [movieList, setMovieList] = useState(null);
+  let list = null;
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(null);
@@ -82,36 +83,43 @@ function App() {
       let numImported = 0;
       setProgress(0);
       setUploading(true);
-      var start,
-        end,
-        diff,
+      var start = 0,
+        end = 0,
+        elapsed = 0,
         total = 0,
-        average,
-        remaining;
+        average = 0,
+        remaining = 0,
+        percentage,
+        rerenderTime = 0;
 
       const csvFile = reader.result;
       movies = JSON.parse(csv2json(csvFile));
-      await Promise.all(
-        movies.map(async (movie, index) => {
-          try {
-            if (movie.Name !== "") {
-              start = new Date();
-              await axios.post(process.env.REACT_APP_API_URL + "/movies", {
-                movie,
-              });
-              numImported++;
-              end = new Date();
-              diff = end - start;
-              total += diff;
-            }
-          } catch (e) {
-            console.log("error", e.message);
+      // await Promise.all(
+      //   movies.map(async (movie, index) => {
+      for (const movie of movies) {
+        try {
+          if (movie.Name !== "") {
+            start = Date.now();
+            await axios.post(process.env.REACT_APP_API_URL + "/movies", {
+              movie,
+            });
+
+            numImported++;
+            percentage = (numImported / movies.length) * 100;
+            end = Date.now();
+            elapsed = (end - start) / 1000; // secs
+            total += elapsed + rerenderTime;
+
+            start = Date.now();
+            setProgress(percentage.toFixed());
+            setRemaining((((100 - percentage) * total) / percentage).toFixed());
+            end = Date.now();
+            rerenderTime = (end - start) / 1000; // secs
           }
-          average = total / numImported / 1000;
-          setRemaining((average * (movies.length - numImported)).toFixed());
-          setProgress(((numImported / movies.length) * 100).toFixed());
-        })
-      );
+        } catch (e) {
+          console.log("error", e.message);
+        }
+      }
 
       setUploading(false);
       refreshTable();
@@ -222,7 +230,7 @@ function App() {
               <span>
                 <label
                   className={` ${
-                    uploading && "w-24"
+                    uploading && "w-32"
                   } relative overflow-hidden cursor-pointer inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700`}
                 >
                   {/*}{uploading && (
@@ -251,7 +259,14 @@ function App() {
                     <span>Import</span>
                   ) : (
                     <>
-                      <span className="mx-auto">{progress}%</span>
+                      <span className="mx-auto">
+                        {remaining > 60
+                          ? Math.floor(remaining / 60) +
+                            "m " +
+                            Math.floor(remaining % 60) +
+                            "s"
+                          : remaining + "s"}
+                      </span>
                       <div
                         className="h-full absolute inset-0 bg-indigo-900 opacity-50"
                         style={{ width: `${progress}%` }}
