@@ -3,10 +3,11 @@ import { csv2json } from "./utils/csv2json";
 import axios from "axios";
 import Filter from "./components/Filter";
 import ProgressBar from "./components/ProgressBar";
+import useInfiniteScroll from "./hooks/InfiniteScroll";
 
 function App() {
   const [movieList, setMovieList] = useState(null);
-  let list = null;
+  const [displayedList, setDisplayedList] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(null);
@@ -17,7 +18,16 @@ function App() {
   const [genre, setGenre] = useState(null);
   const [year, setYear] = useState(null);
 
-  useEffect(() => console.log(loading), [loading]);
+  const [isFetching, setIsFetching] = useInfiniteScroll(fetchMoreItems);
+  const numItems = 50;
+
+  function fetchMoreItems() {
+    setDisplayedList((prevState) => [
+      ...prevState,
+      ...movieList.slice(prevState.length, prevState.length + numItems),
+    ]);
+    setIsFetching(false);
+  }
 
   function forceUpdate(param) {
     switch (param?.field.prop) {
@@ -58,18 +68,14 @@ function App() {
       url += "&" + "value=" + encodeURIComponent(year);
     }
 
-    setLoading(true);
-    axios.get(url).then((data) => {
-      setMovieList(data.data);
-      setLoading(false);
-    });
+    refreshTable(url);
   }, [actor, director, genre, year]);
 
-  function refreshTable() {
-    let url = process.env.REACT_APP_API_URL + "/movies";
+  function refreshTable(url = process.env.REACT_APP_API_URL + "/movies") {
     setLoading(true);
     axios.get(url).then((data) => {
       setMovieList(data.data);
+      setDisplayedList(data.data.slice(0, numItems));
       setLoading(false);
     });
   }
@@ -116,7 +122,8 @@ function App() {
 
             start = Date.now();
             setProgress(percentage.toFixed());
-            setRemaining((((100 - percentage) * total) / percentage).toFixed());
+            remaining = ((100 - percentage) * total) / percentage;
+            setRemaining(percentage !== 0 ? remaining.toFixed() : "Wait");
             end = Date.now();
             rerenderTime = (end - start) / 1000; // secs
           }
@@ -282,11 +289,9 @@ function App() {
               <span>
                 <button
                   onClick={async () => {
-                    setLoading(true);
                     axios
                       .delete(process.env.REACT_APP_API_URL + "/movies")
                       .then(() => refreshTable());
-                    setLoading(false);
                   }}
                   type="button"
                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none "
@@ -317,7 +322,7 @@ function App() {
         <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
             <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-              {loading && (
+              {(loading || isFetching) && (
                 <div className="flex justify-center items-center absolute inset-0">
                   <svg
                     className="h-48 animate-spin-slow mr-2 text-indigo-600"
@@ -366,8 +371,8 @@ function App() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {movieList &&
-                    movieList.map((movie, index) => {
+                  {displayedList &&
+                    displayedList.map((movie, index) => {
                       return (
                         <tr key={index}>
                           {[
