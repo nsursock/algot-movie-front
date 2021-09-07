@@ -1,4 +1,4 @@
-import { React, Fragment, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import useClickOutside from "../hooks/ClickOutside";
 
 export default function Filter({ field, values, update }) {
@@ -21,17 +21,9 @@ export default function Filter({ field, values, update }) {
   }
 
   return (
-    <Fragment>
-      {/*
-  Custom select controls like this require a considerable amount of JS to implement from scratch. We're planning
-  to build some low-level libraries to make this easier with popular frameworks like React, Vue, and even Alpine.js
-  in the near future, but in the mean time we recommend these reference guides when building your implementation:
-
-  https://www.w3.org/TR/wai-aria-practices/#Listbox
-  https://www.w3.org/TR/wai-aria-practices/examples/listbox/listbox-collapsible.html
-*/}
-      <div className="">
-        <div className="relative flex -space-x-1">
+    <div className="">
+      <div className="relative">
+        <div className="flex -space-x-1">
           <button
             onClick={() => toggleMenu()}
             type="button"
@@ -79,61 +71,83 @@ export default function Filter({ field, values, update }) {
               />
             </svg>
           </button>
+        </div>
 
-          {/*
+        {/*
 Select popover, show/hide based on select state.
 
 Entering: ""
-  From: ""
-  To: ""
+From: ""
+To: ""
 Leaving: "transition ease-in duration-100"
-  From: "opacity-100"
-  To: "opacity-0"
-    */}
-          {showMenu && (
-            <ul
-              ref={ref}
-              className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
-              tabIndex={-1}
-              role="listbox"
-              aria-labelledby="listbox-label"
-              aria-activedescendant="listbox-option-3"
-            >
-              {/*
-  Select option, manage highlight styles based on mouseenter/mouseleave and keyboard navigation.
+From: "opacity-100"
+To: "opacity-0"
+  */}
+        {showMenu && (
+          <ul
+            ref={ref}
+            className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
+            tabIndex={-1}
+            role="listbox"
+            aria-labelledby="listbox-label"
+            aria-activedescendant="listbox-option-3"
+          >
+            {/*
+Select option, manage highlight styles based on mouseenter/mouseleave and keyboard navigation.
 
-  Highlighted: "text-white bg-indigo-600", Not Highlighted: "text-gray-900"
+Highlighted: "text-white bg-indigo-600", Not Highlighted: "text-gray-900"
 */}
-              {values &&
-                values.map((value, index) => {
-                  return (
-                    <li
-                      key={index}
-                      className="hover:text-white hover:bg-indigo-600 text-gray-900 cursor-pointer select-none relative py-2 pl-3 pr-9"
-                      id="listbox-option-0"
-                      role="option"
+            {values &&
+              values.map((value, index) => {
+                return (
+                  <li
+                    key={index}
+                    className="hover:text-white hover:bg-indigo-600 text-gray-900 cursor-pointer select-none relative py-2 pl-3 pr-9"
+                    id="listbox-option-0"
+                    role="option"
+                  >
+                    <div className="flex items-center">
+                      {/* Selected: "font-semibold", Not Selected: "font-normal" */}
+                      <span
+                        onClick={() => {
+                          setSelected(value);
+                          toggleMenu();
+                          update({ field, value });
+                        }}
+                        className={`${
+                          selected === value ? "font-semibold" : "font-normal"
+                        }  ml-3 block truncate`}
+                      >
+                        {value}
+                      </span>
+                    </div>
+
+                    <span
+                      className={`${
+                        selected === value ? "text-indigo-600" : "text-white"
+                      } absolute inset-y-0 right-0 flex items-center pr-4`}
                     >
-                      <div className="flex items-center">
-                        {/* Selected: "font-semibold", Not Selected: "font-normal" */}
-                        <span
-                          onClick={() => {
-                            setSelected(value);
-                            // todo reset other filters
-                            update({ field, value });
-                            toggleMenu();
-                          }}
-                          className="font-normal ml-3 block truncate"
-                        >
-                          {value}
-                        </span>
-                      </div>
-                    </li>
-                  );
-                })}
-            </ul>
-          )}
-        </div>
+                      {/* Heroicon name: solid/check */}
+                      <svg
+                        className="h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  </li>
+                );
+              })}
+          </ul>
+        )}
       </div>
-    </Fragment>
+    </div>
   );
 }

@@ -17,6 +17,13 @@ function App() {
   const [director, setDirector] = useState(null);
   const [genre, setGenre] = useState(null);
   const [year, setYear] = useState(null);
+  const [sortDir, setSortDir] = useState(null);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+  const fields = ["actors", "director", "genre", "year", "name"];
 
   const [isFetching, setIsFetching] = useInfiniteScroll(fetchMoreItems);
   const numItems = 50;
@@ -28,6 +35,18 @@ function App() {
     ]);
     setIsFetching(false);
   }
+
+  // const movieListFiltered = useCallback(() => {
+  //   return movieList.filter((movie) => {
+  //     for (const field of fields) {
+  //       const value = movie[field];
+  //       if (Array.isArray(value)) value = value.join();
+  //       if (value?.toLowerCase().includes(searchTerm.toLowerCase()))
+  //         return true;
+  //     }
+  //     return false;
+  //   });
+  // }, [movieList, searchTerm]);
 
   function forceUpdate(param) {
     switch (param?.field.prop) {
@@ -67,9 +86,19 @@ function App() {
       url += "field=" + encodeURIComponent("year");
       url += "&" + "value=" + encodeURIComponent(year);
     }
+    if (searchTerm) {
+      url += actor || director || genre || year ? "&" : "?";
+      url += "field=" + encodeURIComponent("search");
+      url += "&" + "value=" + encodeURIComponent(searchTerm);
+    }
+    if (sortDir) {
+      url += actor || director || genre || year || searchTerm ? "&" : "?";
+      url += "field=" + encodeURIComponent("sort");
+      url += "&" + "value=" + encodeURIComponent(sortDir);
+    }
 
     refreshTable(url);
-  }, [actor, director, genre, year]);
+  }, [actor, director, genre, year, searchTerm, sortDir]);
 
   function refreshTable(url = process.env.REACT_APP_API_URL + "/movies") {
     setLoading(true);
@@ -185,6 +214,80 @@ function App() {
           <div className="mt-5 flex  lg:mt-0 lg:ml-4 ">
             {movieList && (
               <div className="flex space-x-1">
+                {/*<button
+                  onClick={() => setSortDir("asc")}
+                  className="flex items-center text-xs font-semibold text-gray-500"
+                  type="button"
+                  name="button"
+                >
+                  <svg
+                    className="fill-current h-6 w-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setSortDir("desc")}
+                  className="flex items-center text-xs font-semibold text-gray-500"
+                  type="button"
+                  name="button"
+                >
+                  <svg
+                    className="fill-current h-6 w-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"
+                    />
+                  </svg>
+                </button>*/}
+
+                <div className="flex-1 min-w-0">
+                  <label htmlFor="search" className="sr-only">
+                    Search
+                  </label>
+                  <div className="relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="w-5 h-5 text-gray-400"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <input
+                      value={searchTerm}
+                      onChange={handleChange}
+                      type="search"
+                      name="search"
+                      id="search"
+                      className="block w-full pl-10 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                      placeholder="Search"
+                    />
+                  </div>
+                </div>
                 <Filter
                   update={forceUpdate}
                   field={{ col: "Actor", prop: "actors" }}
